@@ -1,9 +1,17 @@
 package com.classbooking.lecture;
 
+import com.classbooking.lecture.dto.Lecture;
+import com.classbooking.lecture.dto.LectureCreResponse;
+import com.classbooking.lecture.dto.LectureListResponse;
+import com.classbooking.lecture.dto.LectureStatus;
 import com.classbooking.member.Member;
 import com.classbooking.member.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,5 +43,16 @@ public class LectureService {
         Lecture savedLecture = lectureRepository.save(lecture);
 
         return new LectureCreResponse(savedLecture.getId(), savedLecture.getInstructorId(), savedLecture.getTitle());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<LectureListResponse> getLectures(LectureStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Lecture> lectures = status == null
+                ? lectureRepository.findAll(pageable)
+                : lectureRepository.findByStatus(status, pageable);
+
+        return lectures.map(LectureListResponse::from);
     }
 }
