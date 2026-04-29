@@ -4,6 +4,8 @@ import com.classbooking.enrollment.dto.Enrollment;
 import com.classbooking.enrollment.dto.EnrollmentStatus;
 import com.classbooking.enrollment.repository.EnrollmentRepository;
 import com.classbooking.enrollment.service.EnrollmentService;
+import com.classbooking.lecture.dto.Lecture;
+import com.classbooking.lecture.repository.LectureRepository;
 import com.classbooking.payment.dto.Payment;
 import com.classbooking.payment.dto.PaymentRequest;
 import com.classbooking.payment.dto.PaymentStatus;
@@ -38,10 +40,14 @@ class PaymentEnrollmentIntegrationTest {
     @Autowired
     private EnrollmentService enrollmentService;
 
+    @Autowired
+    private LectureRepository lectureRepository;
+
     @BeforeEach
     void setUp() {
         paymentRepository.deleteAll();
         enrollmentRepository.deleteAll();
+        lectureRepository.deleteAll();
     }
 
     @Test
@@ -109,7 +115,8 @@ class PaymentEnrollmentIntegrationTest {
     @DisplayName("결제된 수강건 수강 철회 시 환불 처리")
     void enrollmentWithdrawalRefundsSuccessfulPayment() {
         Long memberId = 1L;
-        Enrollment enrollment = enrollmentRepository.save(new Enrollment(memberId, 10L, EnrollmentStatus.PENDING));
+        Lecture lecture = lectureRepository.save(openLecture(99L));
+        Enrollment enrollment = enrollmentRepository.save(new Enrollment(memberId, lecture.getId(), EnrollmentStatus.PENDING));
         PaymentRequest request = new PaymentRequest(enrollment.getId(), BigDecimal.valueOf(50_000));
         paymentService.confirmPayment(memberId, request);
 
@@ -124,5 +131,24 @@ class PaymentEnrollmentIntegrationTest {
                 PaymentStatus.REFUNDED
         ).orElseThrow();
         assertThat(refundedPayment.getRefundedAt()).isNotNull();
+
+        Lecture updatedLecture = lectureRepository.findById(lecture.getId()).orElseThrow();
+        assertThat(updatedLecture.getEnrolledCount()).isZero();
+    }
+
+    private Lecture openLecture(Long instructorId) {
+        Lecture lecture = new Lecture(
+                instructorId,
+                "Instructor",
+                "Spring Boot",
+                "Spring Boot basics",
+                30,
+                BigDecimal.valueOf(50_000),
+                LocalDateTime.of(2026, 5, 1, 10, 0),
+                LocalDateTime.of(2026, 6, 1, 10, 0)
+        );
+        lecture.open(instructorId);
+        lecture.enroll();
+        return lecture;
     }
 }
