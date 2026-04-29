@@ -56,8 +56,8 @@ public class LectureService {
     }
 
     @Transactional(readOnly = true)
-    public LectureDetailResponse getLectureDetail(Long memberId, Long lectureId) {
-        Lecture lecture = lectureRepository.findByIdAndInstructorId(lectureId, memberId)
+    public LectureDetailResponse getLectureDetail(Long lectureId) {
+        Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다."));
 
         return LectureDetailResponse.from(lecture);

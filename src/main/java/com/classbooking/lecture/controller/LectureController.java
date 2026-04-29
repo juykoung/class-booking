@@ -56,15 +56,13 @@ public class LectureController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "강의 상세 조회", description = "요청 회원 기준으로 강의 상세를 조회합니다.")
+    @Operation(summary = "강의 상세 조회", description = "강의 상세를 조회합니다.")
     @GetMapping("/{lectureId}")
     public ResponseEntity<LectureDetailResponse> getLectureDetail(
-            @Parameter(description = "요청 회원 ID", example = "1")
-            @RequestHeader("X-Member-Id") Long memberId,
             @Parameter(description = "강의 ID", example = "1")
             @PathVariable Long lectureId
     ) {
-        LectureDetailResponse response = lectureService.getLectureDetail(memberId, lectureId);
+        LectureDetailResponse response = lectureService.getLectureDetail(lectureId);
         return ResponseEntity.ok(response);
     }
 

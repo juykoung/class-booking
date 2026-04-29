@@ -109,19 +109,17 @@ class LectureServiceTest {
     }
 
     @Test
-    @DisplayName("lecture detail does not check instructor role")
-    void getLectureDetailDoesNotCheckInstructorRole() {
-        Member student = member(1L, MemberRole.STUDENT);
-        Lecture lecture = lecture(student.getId());
+    @DisplayName("lecture detail can be viewed without member check")
+    void getLectureDetailDoesNotCheckMember() {
+        Lecture lecture = lecture(1L);
         ReflectionTestUtils.setField(lecture, "id", 10L);
 
-        when(lectureRepository.findByIdAndInstructorId(lecture.getId(), student.getId()))
-                .thenReturn(Optional.of(lecture));
+        when(lectureRepository.findById(lecture.getId())).thenReturn(Optional.of(lecture));
 
-        LectureDetailResponse response = lectureService.getLectureDetail(student.getId(), lecture.getId());
+        LectureDetailResponse response = lectureService.getLectureDetail(lecture.getId());
 
         assertThat(response.id()).isEqualTo(lecture.getId());
-        assertThat(response.instructorId()).isEqualTo(student.getId());
+        assertThat(response.instructorId()).isEqualTo(lecture.getInstructorId());
         verify(memberRepository, never()).findById(any());
     }
 
