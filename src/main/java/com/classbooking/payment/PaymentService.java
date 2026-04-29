@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -37,5 +38,13 @@ public class PaymentService {
                 request.enrollmentId(),
                 request.amount());
         eventPublisher.publishEvent(new PaymentConfirmedEvent(payment.getId(), payment.getEnrollmentId()));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void refundPayment(Long enrollmentId) {
+        Payment payment = paymentRepository.findByEnrollmentIdAndStatus(enrollmentId, PaymentStatus.SUCCESS)
+                .orElseThrow(() -> new IllegalArgumentException("환불할 결제가 존재하지 않습니다."));
+
+        payment.refund();
     }
 }

@@ -3,6 +3,7 @@ package com.classbooking.payment;
 import com.classbooking.enrollment.dto.Enrollment;
 import com.classbooking.enrollment.dto.EnrollmentStatus;
 import com.classbooking.enrollment.repository.EnrollmentRepository;
+import com.classbooking.enrollment.service.EnrollmentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,9 @@ class PaymentEnrollmentIntegrationTest {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    @Autowired
+    private EnrollmentService enrollmentService;
+
     @BeforeEach
     void setUp() {
         paymentRepository.deleteAll();
@@ -36,7 +40,7 @@ class PaymentEnrollmentIntegrationTest {
     }
 
     @Test
-    @DisplayName("payment success confirms pending enrollment")
+    @DisplayName("PENDING 상태 수강 결제 성공")
     void paymentSuccessConfirmsPendingEnrollment() {
         Long memberId = 1L;
         Enrollment enrollment = enrollmentRepository.save(new Enrollment(memberId, 10L, EnrollmentStatus.PENDING));
@@ -57,7 +61,7 @@ class PaymentEnrollmentIntegrationTest {
     }
 
     @Test
-    @DisplayName("payment fails before saving when enrollment is not payable")
+    @DisplayName("WAITLISTED 상태 수강 결제 실패")
     void paymentFailsBeforeSavingWhenEnrollmentIsNotPayable() {
         Long memberId = 1L;
         Enrollment waitlistedEnrollment = enrollmentRepository.save(
@@ -77,7 +81,7 @@ class PaymentEnrollmentIntegrationTest {
     }
 
     @Test
-    @DisplayName("payment fails before saving when pay deadline has passed")
+    @DisplayName("결제 마감일이 지난 수강건의 결제 실패")
     void paymentFailsBeforeSavingWhenPayDeadlineHasPassed() {
         Long memberId = 1L;
         Enrollment enrollment = new Enrollment(memberId, 10L, EnrollmentStatus.PENDING);
@@ -94,5 +98,26 @@ class PaymentEnrollmentIntegrationTest {
         assertThat(unchangedEnrollment.getStatus()).isEqualTo(EnrollmentStatus.PENDING);
         assertThat(unchangedEnrollment.getPaymentDate()).isNull();
         assertThat(unchangedEnrollment.getCancelDeadline()).isNull();
+    }
+
+    @Test
+    @DisplayName("결제된 수강건 수강 철회 시 환불 처리")
+    void enrollmentWithdrawalRefundsSuccessfulPayment() {
+        Long memberId = 1L;
+        Enrollment enrollment = enrollmentRepository.save(new Enrollment(memberId, 10L, EnrollmentStatus.PENDING));
+        PaymentRequest request = new PaymentRequest(enrollment.getId(), BigDecimal.valueOf(50_000));
+        paymentService.confirmPayment(memberId, request);
+
+        enrollmentService.withdraw(memberId, enrollment.getId());
+
+        Enrollment withdrawnEnrollment = enrollmentRepository.findById(enrollment.getId()).orElseThrow();
+        assertThat(withdrawnEnrollment.getStatus()).isEqualTo(EnrollmentStatus.CANCELLED);
+        assertThat(withdrawnEnrollment.getCancelledAt()).isNotNull();
+
+        Payment refundedPayment = paymentRepository.findByEnrollmentIdAndStatus(
+                enrollment.getId(),
+                PaymentStatus.REFUNDED
+        ).orElseThrow();
+        assertThat(refundedPayment.getRefundedAt()).isNotNull();
     }
 }

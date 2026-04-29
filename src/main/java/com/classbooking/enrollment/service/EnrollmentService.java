@@ -7,6 +7,7 @@ import com.classbooking.lecture.dto.Lecture;
 import com.classbooking.lecture.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final LectureRepository lectureRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void enroll(Long memberId, Long lectureId) {
@@ -43,6 +45,14 @@ public class EnrollmentService {
         enrollment.confirmPayment();
     }
 
-    // 수강 취소
+    @Transactional
+    public void withdraw(Long memberId, Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new IllegalArgumentException("수강 신청을 찾을 수 없습니다."));
+
+        enrollment.withdraw(memberId);
+        eventPublisher.publishEvent(new EnrollmentWithdrawnEvent(enrollmentId));
+    }
+
     // 내 수강 신청 목록 조회
 }

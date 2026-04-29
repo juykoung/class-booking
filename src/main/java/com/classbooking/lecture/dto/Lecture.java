@@ -95,4 +95,11 @@ public class Lecture extends BaseEntity {
         this.enrolledCount++;
         return true;
     }
+
+    // 수강 철회
+    public void withdraw() {
+        if (this.enrolledCount > 0) {
+            this.enrolledCount--;
+        }
+    }
 }

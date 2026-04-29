@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
+    // 수강 신청
     @PostMapping("/{lectureId}/enroll")
     public ResponseEntity<Void> enroll(
             @RequestHeader("X-Member-Id") Long memberId,
@@ -24,5 +25,13 @@ public class EnrollmentController {
     }
 
     // 수강 취소
+    @PostMapping("/{lectureId}/withdraw")
+    public ResponseEntity<Void> withdraw(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @PathVariable Long enrollmentId) {
+        enrollmentService.withdraw(memberId, enrollmentId);
+        return ResponseEntity.ok().build();
+    }
+
     // 내 수강 신청 목록 조회
 }
