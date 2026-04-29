@@ -139,6 +139,101 @@ class LectureServiceTest {
         verify(memberRepository, never()).findById(any());
     }
 
+    @Test
+    @DisplayName("lecture owner can open a draft lecture")
+    void openLectureByOwner() {
+        Long memberId = 1L;
+        Lecture lecture = lecture(memberId);
+
+        when(lectureRepository.findById(10L)).thenReturn(Optional.of(lecture));
+
+        lectureService.openLecture(memberId, 10L);
+
+        assertThat(lecture.getStatus()).isEqualTo(LectureStatus.OPEN);
+    }
+
+    @Test
+    @DisplayName("open lecture fails when lecture does not exist")
+    void openLectureByUnknownLectureThrowsException() {
+        when(lectureRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> lectureService.openLecture(1L, 10L))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("non-owner cannot open lecture")
+    void openLectureByNonOwnerThrowsException() {
+        Lecture lecture = lecture(1L);
+
+        when(lectureRepository.findById(10L)).thenReturn(Optional.of(lecture));
+
+        assertThatThrownBy(() -> lectureService.openLecture(2L, 10L))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(lecture.getStatus()).isEqualTo(LectureStatus.DRAFT);
+    }
+
+    @Test
+    @DisplayName("only draft lecture can be opened")
+    void openLectureWithNonDraftStatusThrowsException() {
+        Lecture lecture = lecture(1L);
+        lecture.open(1L);
+
+        when(lectureRepository.findById(10L)).thenReturn(Optional.of(lecture));
+
+        assertThatThrownBy(() -> lectureService.openLecture(1L, 10L))
+                .isInstanceOf(IllegalStateException.class);
+        assertThat(lecture.getStatus()).isEqualTo(LectureStatus.OPEN);
+    }
+
+    @Test
+    @DisplayName("lecture owner can close an open lecture")
+    void closeLectureByOwner() {
+        Long memberId = 1L;
+        Lecture lecture = lecture(memberId);
+        lecture.open(memberId);
+
+        when(lectureRepository.findById(10L)).thenReturn(Optional.of(lecture));
+
+        lectureService.closeLecture(memberId, 10L);
+
+        assertThat(lecture.getStatus()).isEqualTo(LectureStatus.CLOSED);
+    }
+
+    @Test
+    @DisplayName("close lecture fails when lecture does not exist")
+    void closeLectureByUnknownLectureThrowsException() {
+        when(lectureRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> lectureService.closeLecture(1L, 10L))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("non-owner cannot close lecture")
+    void closeLectureByNonOwnerThrowsException() {
+        Lecture lecture = lecture(1L);
+        lecture.open(1L);
+
+        when(lectureRepository.findById(10L)).thenReturn(Optional.of(lecture));
+
+        assertThatThrownBy(() -> lectureService.closeLecture(2L, 10L))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(lecture.getStatus()).isEqualTo(LectureStatus.OPEN);
+    }
+
+    @Test
+    @DisplayName("only open lecture can be closed")
+    void closeLectureWithNonOpenStatusThrowsException() {
+        Lecture lecture = lecture(1L);
+
+        when(lectureRepository.findById(10L)).thenReturn(Optional.of(lecture));
+
+        assertThatThrownBy(() -> lectureService.closeLecture(1L, 10L))
+                .isInstanceOf(IllegalStateException.class);
+        assertThat(lecture.getStatus()).isEqualTo(LectureStatus.DRAFT);
+    }
+
     private LectureCreRequest lectureRequest() {
         return new LectureCreRequest(
                 "Spring Boot",

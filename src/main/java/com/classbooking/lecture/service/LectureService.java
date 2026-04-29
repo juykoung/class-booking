@@ -63,4 +63,20 @@ public class LectureService {
         return LectureDetailResponse.from(lecture);
 
     }
+
+    @Transactional
+    public void openLecture(Long memberId, Long lectureId) {
+       Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다."));
+
+        lecture.open(memberId);
+    }
+
+    @Transactional
+    public void closeLecture(Long memberId, Long lectureId) {
+      Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다."));
+
+        lecture.close(memberId);
+    }
 }

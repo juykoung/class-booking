@@ -60,9 +60,8 @@ public class Lecture extends BaseEntity {
     }
 
     public void open(Long memberId) {
-        if (!this.instructorId.equals(memberId)) {
-            throw new IllegalStateException("강의 개설 권한이 없습니다.");
-        }
+        validateOwner(memberId);
+
         if (this.status != LectureStatus.DRAFT) {
             throw new IllegalStateException("강의는 DRAFT 상태에서만 OPEN으로 변경할 수 있습니다.");
         }
@@ -70,12 +69,17 @@ public class Lecture extends BaseEntity {
     }
 
     public void close(Long memberId) {
-        if (!this.instructorId.equals(memberId)) {
-            throw new IllegalStateException("강의 폐쇄 권한이 없습니다.");
-        }
+        validateOwner(memberId);
+
         if (this.status != LectureStatus.OPEN) {
             throw new IllegalStateException("강의는 OPEN 상태에서만 CLOSE로 변경할 수 있습니다.");
         }
         this.status = LectureStatus.CLOSED;
+    }
+
+    public void validateOwner(Long memberId) {
+        if (!this.instructorId.equals(memberId)) {
+            throw new IllegalArgumentException("강의 수정은 강사 본인만 가능합니다.");
+        }
     }
 }

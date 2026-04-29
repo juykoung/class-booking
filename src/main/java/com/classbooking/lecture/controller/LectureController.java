@@ -20,7 +20,7 @@ public class LectureController {
      */
     @PostMapping
     public ResponseEntity<LectureCreResponse> createLecture(
-            @RequestHeader Long memberId,
+            @RequestHeader("X-Member-Id") Long memberId,
             @Valid @RequestBody LectureCreRequest request) {
         LectureCreResponse response = lectureService.createLecture(memberId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -47,5 +47,27 @@ public class LectureController {
             @PathVariable Long lectureId) {
         LectureDetailResponse response = lectureService.getLectureDetail(memberId, lectureId);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 강의 오픈
+     */
+    @PatchMapping("/{lectureId}/open")
+    public ResponseEntity<Void> openLecture(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @PathVariable Long lectureId) {
+        lectureService.openLecture(memberId, lectureId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 강의 닫음
+     */
+    @PatchMapping("/{lectureId}/close")
+    public ResponseEntity<Void> closeLecture(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @PathVariable Long lectureId) {
+        lectureService.closeLecture(memberId, lectureId);
+        return ResponseEntity.ok().build();
     }
 }
