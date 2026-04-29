@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public record LectureDetailResponse(
         Long id, Long instructorId, String instructorName, String title, String description,
-        BigDecimal price, Integer capacity, Integer confirmedCount, LectureStatus status,
+        BigDecimal price, int capacity, int enrolledCount, LectureStatus status,
         LocalDateTime startAt, LocalDateTime endAt
 ) {
     public static LectureDetailResponse from(Lecture lecture) {
@@ -17,7 +17,7 @@ public record LectureDetailResponse(
                 lecture.getDescription(),
                 lecture.getPrice(),
                 lecture.getCapacity(),
-                lecture.getConfirmedCount(),
+                lecture.getEnrolledCount(),
                 lecture.getStatus(),
                 lecture.getStartAt(),
                 lecture.getEndAt()

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public record LectureCreRequest(
         String title,
         String description,
-        Integer capacity,
+        int capacity,
         BigDecimal price,
         LocalDateTime startAt,
         LocalDateTime endAt

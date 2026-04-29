@@ -28,10 +28,10 @@ public class Lecture extends BaseEntity {
     private String description;
 
     @Column(nullable = false)
-    private Integer capacity;
+    private int capacity;
 
-    @Column(nullable = true)
-    private Integer confirmedCount;
+    @Column(nullable = false)
+    private int enrolledCount;
 
     @Column(nullable = false)
     private BigDecimal price;
@@ -46,13 +46,13 @@ public class Lecture extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private LectureStatus status;
 
-    public Lecture(Long instructorId, String instructorName, String title, String description, Integer capacity, BigDecimal price, LocalDateTime startAt, LocalDateTime endAt) {
+    public Lecture(Long instructorId, String instructorName, String title, String description, int capacity, BigDecimal price, LocalDateTime startAt, LocalDateTime endAt) {
         this.instructorId = instructorId;
         this.instructorName = instructorName;
         this.title = title;
         this.description = description;
         this.capacity = capacity;
-        this.confirmedCount = 0; // 초기값은 0
+        this.enrolledCount = 0; // 초기값은 0
         this.price = price;
         this.startAt = startAt;
         this.endAt = endAt;
@@ -81,5 +81,18 @@ public class Lecture extends BaseEntity {
         if (!this.instructorId.equals(memberId)) {
             throw new IllegalArgumentException("강의 수정은 강사 본인만 가능합니다.");
         }
+    }
+
+    public boolean enroll() {
+        if (this.status != LectureStatus.OPEN) {
+            throw new IllegalStateException("강의가 OPEN 상태가 아니므로 수강 신청이 불가능합니다.");
+        }
+
+        if (this.enrolledCount >= this.capacity) {
+            return false;
+        }
+
+        this.enrolledCount++;
+        return true;
     }
 }
