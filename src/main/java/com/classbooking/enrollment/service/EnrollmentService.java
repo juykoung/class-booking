@@ -4,9 +4,12 @@ import com.classbooking.enrollment.dto.Enrollment;
 import com.classbooking.enrollment.dto.EnrollmentListResponse;
 import com.classbooking.enrollment.dto.EnrollmentStatus;
 import com.classbooking.enrollment.dto.EnrollmentWithdrawnEvent;
+import com.classbooking.enrollment.dto.LectureEnrollmentResponse;
 import com.classbooking.enrollment.repository.EnrollmentRepository;
 import com.classbooking.lecture.dto.Lecture;
 import com.classbooking.lecture.repository.LectureRepository;
+import com.classbooking.member.Member;
+import com.classbooking.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,12 +21,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final LectureRepository lectureRepository;
+    private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -57,6 +65,11 @@ public class EnrollmentService {
                 .orElseThrow(() -> new IllegalArgumentException("수강 신청을 찾을 수 없습니다."));
 
         enrollment.withdraw(memberId);
+
+        Lecture lecture = lectureRepository.findByIdWithPessimisticLock(enrollment.getLectureId())
+                .orElseThrow(() -> new IllegalArgumentException("강의를 찾을 수 없습니다."));
+        lecture.withdraw();
+
         eventPublisher.publishEvent(new EnrollmentWithdrawnEvent(enrollmentId));
     }
 
