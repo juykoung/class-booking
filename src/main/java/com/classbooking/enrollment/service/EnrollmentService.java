@@ -84,31 +84,4 @@ public class EnrollmentService {
 
         return enrollments.map(EnrollmentListResponse::from);
     }
-
-    @Transactional(readOnly = true)
-    public Page<LectureEnrollmentResponse> getLectureEnrollments(
-            Long instructorId, Long lectureId, EnrollmentStatus status, int page, int size
-    ) {
-        Lecture lecture = lectureRepository.findById(lectureId)
-                .orElseThrow(() -> new IllegalArgumentException("강의를 찾을 수 없습니다."));
-
-        lecture.validateOwner(instructorId);
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Enrollment> enrollments = status == null ?
-                enrollmentRepository.findByLectureId(lectureId, pageable) :
-                enrollmentRepository.findByLectureIdAndStatus(lectureId, status, pageable);
-
-        Map<Long, Member> membersById = memberRepository.findAllById( enrollments.getContent().stream()
-                .map(Enrollment::getMemberId)
-                .toList() ).stream()
-                .collect(Collectors.toMap(Member::getId, Function.identity()));
-        return enrollments.map(enrollment -> {
-            Member member = membersById.get(enrollment.getMemberId());
-            if (member == null) {
-                throw new IllegalStateException("회원을 찾을 수 없습니다.");
-            }
-            return LectureEnrollmentResponse.of(enrollment, member);
-        });
-    }
 }

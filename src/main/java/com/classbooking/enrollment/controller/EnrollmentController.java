@@ -64,28 +64,4 @@ public class EnrollmentController {
         Page<EnrollmentListResponse> response = enrollmentService.getMyEnrollments(memberId, status, page, size);
         return ResponseEntity.ok(response);
     }
-
-    @Operation(summary = "강의별 수강생 목록 조회", description = "강사가 본인 강의의 수강생 목록을 조회합니다. 상태 필터는 선택값입니다.")
-    @GetMapping("/lectures/{lectureId}/students")
-    public ResponseEntity<Page<LectureEnrollmentResponse>> getLectureEnrollments(
-            @Parameter(description = "강사 회원 ID", example = "1")
-            @RequestHeader("X-Member-Id") Long instructorId,
-            @Parameter(description = "강의 ID", example = "1")
-            @PathVariable Long lectureId,
-            @Parameter(description = "수강 신청 상태 필터", example = "CONFIRMED")
-            @RequestParam(required = false) EnrollmentStatus status,
-            @Parameter(description = "페이지 번호", example = "0")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 크기", example = "10")
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Page<LectureEnrollmentResponse> response = enrollmentService.getLectureEnrollments(
-                instructorId,
-                lectureId,
-                status,
-                page,
-                size
-        );
-        return ResponseEntity.ok(response);
-    }
 }
