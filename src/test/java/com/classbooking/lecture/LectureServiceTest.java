@@ -1,5 +1,10 @@
 package com.classbooking.lecture;
 
+import com.classbooking.lecture.dto.Lecture;
+import com.classbooking.lecture.dto.LectureCreResponse;
+import com.classbooking.lecture.dto.LectureCreRequest;
+import com.classbooking.lecture.dto.LectureDetailResponse;
+import com.classbooking.lecture.dto.LectureStatus;
 import com.classbooking.member.Member;
 import com.classbooking.member.MemberRepository;
 import com.classbooking.member.MemberRole;
@@ -11,10 +16,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +47,7 @@ class LectureServiceTest {
     @Test
     @DisplayName("강사는 강의를 개설할 수 있다")
     void createLectureByInstructor() {
-        LectureRequest request = lectureRequest();
+        LectureCreRequest request = lectureRequest();
         Member instructor = member(MemberRole.INSTRUCTOR);
 
         when(memberRepository.findById(instructor.getId())).thenReturn(Optional.of(instructor));
@@ -72,7 +80,7 @@ class LectureServiceTest {
     @Test
     @DisplayName("강사가 아닌 회원은 강의를 개설할 수 없다")
     void createLectureByNonInstructorThrowsException() {
-        LectureRequest request = lectureRequest();
+        LectureCreRequest request = lectureRequest();
         Member student = member(MemberRole.STUDENT);
 
         when(memberRepository.findById(student.getId())).thenReturn(Optional.of(student));
@@ -87,7 +95,7 @@ class LectureServiceTest {
     @Test
     @DisplayName("존재하지 않는 회원이면 강의를 개설할 수 없다")
     void createLectureByUnknownMemberThrowsException() {
-        LectureRequest request = lectureRequest();
+        LectureCreRequest request = lectureRequest();
         Long unknownMemberId = 99L;
 
         when(memberRepository.findById(unknownMemberId)).thenReturn(Optional.empty());
@@ -98,10 +106,41 @@ class LectureServiceTest {
         verify(lectureRepository, never()).save(any());
     }
 
-    private LectureRequest lectureRequest() {
-        return new LectureRequest(
-                "Spring Boot 입문",
-                "Spring Boot 기본기를 다지는 강의",
+    @Test
+    @DisplayName("lecture detail does not check instructor role")
+    void getLectureDetailDoesNotCheckInstructorRole() {
+        Member student = member(1L, MemberRole.STUDENT);
+        Lecture lecture = lecture(student.getId());
+        ReflectionTestUtils.setField(lecture, "id", 10L);
+
+        when(lectureRepository.findByIdAndInstructorId(lecture.getId(), student.getId()))
+                .thenReturn(Optional.of(lecture));
+
+        LectureDetailResponse response = lectureService.getLectureDetail(student.getId(), lecture.getId());
+
+        assertThat(response.id()).isEqualTo(lecture.getId());
+        assertThat(response.instructorId()).isEqualTo(student.getId());
+        verify(memberRepository, never()).findById(any());
+    }
+
+    @Test
+    @DisplayName("lecture list does not check instructor role")
+    void getLecturesDoesNotCheckInstructorRole() {
+        Lecture lecture = lecture(1L);
+
+        when(lectureRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(lecture)));
+
+        Page<?> response = lectureService.getLectures(null, 0, 10);
+
+        assertThat(response.getContent()).hasSize(1);
+        verify(memberRepository, never()).findById(any());
+    }
+
+    private LectureCreRequest lectureRequest() {
+        return new LectureCreRequest(
+                "Spring Boot",
+                "Spring Boot basics",
                 30,
                 BigDecimal.valueOf(50_000),
                 LocalDateTime.of(2026, 5, 1, 10, 0),
@@ -110,8 +149,26 @@ class LectureServiceTest {
     }
 
     private Member member(MemberRole role) {
+        return member(1L, role);
+    }
+
+    private Member member(Long id, MemberRole role) {
         Member member = new Member();
+        ReflectionTestUtils.setField(member, "id", id);
         ReflectionTestUtils.setField(member, "role", role);
         return member;
+    }
+
+    private Lecture lecture(Long instructorId) {
+        return new Lecture(
+                instructorId,
+                "Instructor",
+                "Spring Boot",
+                "Spring Boot basics",
+                30,
+                BigDecimal.valueOf(50_000),
+                LocalDateTime.of(2026, 5, 1, 10, 0),
+                LocalDateTime.of(2026, 6, 1, 10, 0)
+        );
     }
 }

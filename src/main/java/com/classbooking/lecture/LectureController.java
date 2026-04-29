@@ -1,8 +1,6 @@
 package com.classbooking.lecture;
 
-import com.classbooking.lecture.dto.LectureCreResponse;
-import com.classbooking.lecture.dto.LectureListResponse;
-import com.classbooking.lecture.dto.LectureStatus;
+import com.classbooking.lecture.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,7 +20,7 @@ public class LectureController {
     @PostMapping
     public ResponseEntity<LectureCreResponse> createLecture(
             @RequestHeader Long memberId,
-            @Valid @RequestBody LectureRequest request) {
+            @Valid @RequestBody LectureCreRequest request) {
         LectureCreResponse response = lectureService.createLecture(memberId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -36,6 +34,17 @@ public class LectureController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<LectureListResponse> response = lectureService.getLectures(status, page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 강의 상세 조회
+     */
+    @GetMapping("/{lectureId}")
+    public ResponseEntity<LectureDetailResponse> getLectureDetail(
+            @RequestHeader Long memberId,
+            @PathVariable Long lectureId) {
+        LectureDetailResponse response = lectureService.getLectureDetail(memberId, lectureId);
         return ResponseEntity.ok(response);
     }
 }

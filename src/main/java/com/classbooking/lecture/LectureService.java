@@ -1,9 +1,6 @@
 package com.classbooking.lecture;
 
-import com.classbooking.lecture.dto.Lecture;
-import com.classbooking.lecture.dto.LectureCreResponse;
-import com.classbooking.lecture.dto.LectureListResponse;
-import com.classbooking.lecture.dto.LectureStatus;
+import com.classbooking.lecture.dto.*;
 import com.classbooking.member.Member;
 import com.classbooking.member.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +19,7 @@ public class LectureService {
     private final LectureRepository lectureRepository;
 
     @Transactional
-    public LectureCreResponse createLecture(Long memberId, LectureRequest request) {
+    public LectureCreResponse createLecture(Long memberId, LectureCreRequest request) {
         Member instructor = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
 
@@ -32,6 +29,7 @@ public class LectureService {
 
         Lecture lecture = new Lecture(
                 memberId,
+                instructor.getName(),
                 request.title(),
                 request.description(),
                 request.capacity(),
@@ -54,5 +52,14 @@ public class LectureService {
                 : lectureRepository.findByStatus(status, pageable);
 
         return lectures.map(LectureListResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public LectureDetailResponse getLectureDetail(Long memberId, Long lectureId) {
+        Lecture lecture = lectureRepository.findByIdAndInstructorId(lectureId, memberId)
+                .orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다."));
+
+        return LectureDetailResponse.from(lecture);
+
     }
 }
