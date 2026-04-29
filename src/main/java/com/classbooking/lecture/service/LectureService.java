@@ -1,5 +1,6 @@
-package com.classbooking.lecture;
+package com.classbooking.lecture.service;
 
+import com.classbooking.lecture.repository.LectureRepository;
 import com.classbooking.lecture.dto.*;
 import com.classbooking.member.Member;
 import com.classbooking.member.MemberRepository;

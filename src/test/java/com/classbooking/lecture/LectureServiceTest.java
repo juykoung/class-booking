@@ -5,6 +5,8 @@ import com.classbooking.lecture.dto.LectureCreResponse;
 import com.classbooking.lecture.dto.LectureCreRequest;
 import com.classbooking.lecture.dto.LectureDetailResponse;
 import com.classbooking.lecture.dto.LectureStatus;
+import com.classbooking.lecture.repository.LectureRepository;
+import com.classbooking.lecture.service.LectureService;
 import com.classbooking.member.Member;
 import com.classbooking.member.MemberRepository;
 import com.classbooking.member.MemberRole;

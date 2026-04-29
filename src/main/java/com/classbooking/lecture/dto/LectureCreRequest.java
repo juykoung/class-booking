@@ -1,9 +1,9 @@
-package com.classbooking.lecture;
+package com.classbooking.lecture.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record LectureRequest(
+public record LectureCreRequest(
         String title,
         String description,
         Integer capacity,

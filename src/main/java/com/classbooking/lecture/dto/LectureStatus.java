@@ -1,4 +1,4 @@
-package com.classbooking.lecture;
+package com.classbooking.lecture.dto;
 
 public enum LectureStatus {
     DRAFT,      // 초안(신청 불가)

@@ -1,6 +1,7 @@
-package com.classbooking.lecture;
+package com.classbooking.lecture.controller;
 
 import com.classbooking.lecture.dto.*;
+import com.classbooking.lecture.service.LectureService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

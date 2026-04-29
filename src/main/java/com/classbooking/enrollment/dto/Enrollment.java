@@ -1,4 +1,4 @@
-package com.classbooking.enrollment;
+package com.classbooking.enrollment.dto;
 
 import com.classbooking.common.BaseEntity;
 import jakarta.persistence.Column;
