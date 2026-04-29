@@ -1,12 +1,12 @@
 package com.classbooking.payment;
 
+import com.classbooking.enrollment.dto.Enrollment;
+import com.classbooking.enrollment.repository.EnrollmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 
 @Slf4j
 @Service
@@ -14,9 +14,15 @@ import java.math.BigDecimal;
 public class PaymentService {
     private final ApplicationEventPublisher eventPublisher;
     private final PaymentRepository paymentRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     @Transactional
     public void confirmPayment(Long memberId, PaymentRequest request) {
+        Enrollment enrollment = enrollmentRepository.findById(request.enrollmentId())
+                .orElseThrow(() -> new IllegalArgumentException("수강신청이 존재하지 않습니다."));
+
+        enrollment.validatePayable(memberId);
+
         Payment payment = new Payment(
                 memberId,
                 request.enrollmentId(),
@@ -24,9 +30,12 @@ public class PaymentService {
                 PaymentStatus.SUCCESS
         );
 
-         paymentRepository.save(payment);
+        paymentRepository.save(payment);
 
-        log.info("[Payment] 결제 확정. memberId={}, lectureId={}, amount={}", memberId, request.enrollmentId(), request.amount());
+        log.info("[Payment] Payment confirmed. memberId={}, enrollmentId={}, amount={}",
+                memberId,
+                request.enrollmentId(),
+                request.amount());
         eventPublisher.publishEvent(new PaymentConfirmedEvent(payment.getId(), payment.getEnrollmentId()));
     }
 }
