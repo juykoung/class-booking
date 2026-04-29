@@ -51,7 +51,25 @@ public class Enrollment extends BaseEntity {
         this.cancelledAt = null;
     }
 
-    // 결제 확정 처리
+    // 결제&수강 확정 처리
+    public void confirmPayment() {
+        if (this.status != EnrollmentStatus.PENDING) {
+            throw new IllegalStateException("결제 확정은 PENDING 상태에서만 가능합니다.");
+        }
+        this.status = EnrollmentStatus.CONFIRMED;
+        this.paymentDate = LocalDateTime.now();
+        this.cancelDeadline = this.paymentDate.plusDays(7);
+    }
 
     // 수강 취소
+    public void cancel() {
+        if (this.status != EnrollmentStatus.CONFIRMED) {
+            throw new IllegalStateException("수강 취소는 CONFIRMED 상태에서만 가능합니다.");
+        }
+        if (LocalDateTime.now().isAfter(this.cancelDeadline)) {
+            throw new IllegalStateException("수강 취소 마감일이 지났습니다.");
+        }
+        this.status = EnrollmentStatus.CANCELLED;
+        this.cancelledAt = LocalDateTime.now();
+    }
 }

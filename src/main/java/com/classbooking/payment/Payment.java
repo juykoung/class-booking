@@ -20,7 +20,7 @@ public class Payment extends BaseEntity {
     private Long memberId;
 
     @Column(nullable = false)
-    private Long lectureId;
+    private Long enrollmentId;
 
     @Column(nullable = false)
     private BigDecimal amount;
@@ -30,4 +30,12 @@ public class Payment extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDateTime paymentAt;
+
+    public Payment(Long memberId, Long enrollmentId, BigDecimal amount, PaymentStatus status) {
+        this.memberId = memberId;
+        this.enrollmentId = enrollmentId;
+        this.amount = amount;
+        this.status = status;
+        this.paymentAt = LocalDateTime.now();
+    }
 }

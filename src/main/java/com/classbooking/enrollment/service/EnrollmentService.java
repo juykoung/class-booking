@@ -8,6 +8,7 @@ import com.classbooking.lecture.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -33,7 +34,15 @@ public class EnrollmentService {
         enrollmentRepository.save(enrollment);
     }
 
-    // 결제 확정
+    // 결제 확정 이벤트 수신 후 enrollment 상태 업데이트
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void confirmPayment(Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new IllegalArgumentException("수강 신청을 찾을 수 없습니다."));
+
+        enrollment.confirmPayment();
+    }
+
     // 수강 취소
     // 내 수강 신청 목록 조회
 }
