@@ -1,4 +1,4 @@
-package com.classbooking.payment;
+package com.classbooking.payment.dto;
 
 import java.math.BigDecimal;
 

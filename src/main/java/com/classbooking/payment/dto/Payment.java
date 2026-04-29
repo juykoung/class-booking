@@ -1,4 +1,4 @@
-package com.classbooking.payment;
+package com.classbooking.payment.dto;
 
 import com.classbooking.common.BaseEntity;
 import jakarta.persistence.Column;

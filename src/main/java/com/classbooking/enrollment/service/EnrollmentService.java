@@ -2,6 +2,7 @@ package com.classbooking.enrollment.service;
 
 import com.classbooking.enrollment.dto.Enrollment;
 import com.classbooking.enrollment.dto.EnrollmentStatus;
+import com.classbooking.enrollment.dto.EnrollmentWithdrawnEvent;
 import com.classbooking.enrollment.repository.EnrollmentRepository;
 import com.classbooking.lecture.dto.Lecture;
 import com.classbooking.lecture.repository.LectureRepository;

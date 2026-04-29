@@ -1,10 +1,10 @@
-package com.classbooking.payment;
+package com.classbooking.payment.controller;
 
+import com.classbooking.payment.service.PaymentService;
+import com.classbooking.payment.dto.PaymentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/payment")

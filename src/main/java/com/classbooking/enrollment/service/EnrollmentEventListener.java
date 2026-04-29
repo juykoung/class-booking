@@ -1,6 +1,6 @@
-package com.classbooking.payment;
+package com.classbooking.enrollment.service;
 
-import com.classbooking.enrollment.service.EnrollmentWithdrawnEvent;
+import com.classbooking.payment.dto.PaymentConfirmedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
@@ -13,8 +13,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PaymentEventListener {
-    private final PaymentService paymentService;
+public class EnrollmentEventListener {
+    private final EnrollmentService enrollmentService;
 
     @Retryable(
             retryFor = Exception.class,
@@ -22,14 +22,15 @@ public class PaymentEventListener {
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleEnrollmentWithdrawn(EnrollmentWithdrawnEvent event) {
-        paymentService.refundPayment(event.enrollmentId());
+    public void handlePaymentConfirmed(PaymentConfirmedEvent event) {
+        enrollmentService.confirmPayment(event.enrollmentId());
     }
 
     @Recover
-    public void recover(Exception exception, EnrollmentWithdrawnEvent event) {
+    public void recover(Exception exception, PaymentConfirmedEvent event) {
         log.error(
-                "[Payment] 환불 처리 실패. 수강신청 ID: {}",
+                "[Enrollment] 수강 확정 실패. paymentId={}, enrollmentId={}",
+                event.paymentId(),
                 event.enrollmentId(),
                 exception
         );

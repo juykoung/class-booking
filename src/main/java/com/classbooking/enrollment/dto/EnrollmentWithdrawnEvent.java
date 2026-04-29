@@ -1,4 +1,4 @@
-package com.classbooking.enrollment.service;
+package com.classbooking.enrollment.dto;
 
 public record EnrollmentWithdrawnEvent(
         Long enrollmentId

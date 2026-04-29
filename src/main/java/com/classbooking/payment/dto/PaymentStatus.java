@@ -1,4 +1,4 @@
-package com.classbooking.payment;
+package com.classbooking.payment.dto;
 
 public enum PaymentStatus {
     PENDING,    // 신청 완료, 결제 대기
