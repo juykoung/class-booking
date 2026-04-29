@@ -2,6 +2,14 @@ spring:
   profiles:
     active: local
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
 ---
 
 spring:
@@ -20,6 +28,7 @@ spring:
       enabled: true
 
   jpa:
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: create-drop
     show-sql: true
@@ -41,6 +50,11 @@ spring:
     password: app_pass
 
   jpa:
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
     show-sql: false
+
+  sql:
+    init:
+      mode: always

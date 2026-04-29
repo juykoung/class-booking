@@ -1,10 +1,7 @@
 package com.classbooking.lecture.dto;
 
 import com.classbooking.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "lectures")
 @NoArgsConstructor
 @Getter
 public class Lecture extends BaseEntity {

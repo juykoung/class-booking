@@ -1,14 +1,12 @@
 package com.classbooking.member;
 
 import com.classbooking.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "members")
 @NoArgsConstructor
 @Getter
 public class Member extends BaseEntity {

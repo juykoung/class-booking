@@ -25,6 +25,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework:spring-aop")
     implementation("org.springframework.retry:spring-retry:2.0.12")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
