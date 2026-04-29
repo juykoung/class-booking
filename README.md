@@ -13,7 +13,6 @@
 - 결제 완료 이벤트 기반 수강 확정
 - 수강 취소 이벤트 기반 결제 환불
 - 내 수강 신청 목록 조회
-- 강사 전용 강의별 수강생 목록 조회
 
 ## 기술 스택
 
@@ -52,10 +51,25 @@ docker compose up --build
 Docker Compose 실행 시 PostgreSQL과 애플리케이션이 함께 실행됩니다.
 
 - App: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 - PostgreSQL: `localhost:5432`
 - DB: `app_db`
 - User: `app_user`
 - Password: `app_pass`
+
+## 인증 및 테스트 계정
+본 프로젝트는 회원가입/로그인 기능을 구현 범위에서 제외했습니다. 
+대신 인증된 사용자가 존재한다고 가정하고, 모든 API 요청 시 헤더를 통해 사용자를 식별합니다.
+
+- **인증 방식**: 요청 헤더 `X-Member-Id`에 회원 ID 전달
+- **테스트용 기본 데이터**: (시스템 시작 시 자동 생성)
+
+  | ID | 역할  | 설명                  |
+  | -- | --- | ------------------- |
+  | 1  | 강사  | 강의 생성, 오픈, 마감 권한 보유 |
+  | 2  | 수강생 | 수강 신청, 결제, 취소 가능    |
+  | 3  | 수강생 | 수강 신청, 결제, 취소 가능    |
 
 ## 요구사항 해석 및 가정
 
@@ -120,123 +134,6 @@ AI는 다음 작업에 활용했습니다.
 - README 문서 작성 보조
 
 최종 구현 방향과 도메인 정책은 요구사항에 맞춰 직접 결정했습니다.
-
-## API 목록 및 예시
-
-공통으로 사용자 식별이 필요한 API는 `X-Member-Id` 헤더를 사용합니다.
-
-### Health Check
-
-```http
-GET /
-```
-
-### 강의 생성
-
-```http
-POST /lecture
-X-Member-Id: 1
-Content-Type: application/json
-
-{
-  "title": "Spring Boot",
-  "description": "Spring Boot basics",
-  "capacity": 30,
-  "price": 50000,
-  "startAt": "2026-05-01T10:00:00",
-  "endAt": "2026-06-01T10:00:00"
-}
-```
-
-### 강의 목록 조회
-
-```http
-GET /lecture/list?status=OPEN&page=0&size=10
-```
-
-`status`는 선택값입니다.
-
-### 강의 상세 조회
-
-```http
-GET /lecture/1
-X-Member-Id: 1
-```
-
-### 강의 오픈
-
-```http
-PATCH /lecture/1/open
-X-Member-Id: 1
-```
-
-### 강의 마감
-
-```http
-PATCH /lecture/1/close
-X-Member-Id: 1
-```
-
-### 수강 신청
-
-```http
-POST /enrollment/1/enroll
-X-Member-Id: 2
-```
-
-정원 내 신청이면 `PENDING`, 정원 초과면 `WAITLISTED`로 저장됩니다.
-
-### 수강 취소
-
-```http
-POST /enrollment/10/withdraw
-X-Member-Id: 2
-```
-
-### 내 수강 신청 목록
-
-```http
-GET /enrollment/list?status=PENDING&page=0&size=10
-X-Member-Id: 2
-```
-
-`status`는 선택값입니다.
-
-### 강의별 수강생 목록
-
-```http
-GET /enrollment/lectures/1/students?status=CONFIRMED&page=0&size=10
-X-Member-Id: 1
-```
-
-강사 본인의 강의만 조회할 수 있습니다.
-
-응답 예시:
-
-```json
-{
-  "content": [
-    {
-      "memberId": 2,
-      "name": "홍길동",
-      "status": "CONFIRMED"
-    }
-  ]
-}
-```
-
-### 결제 확정
-
-```http
-PATCH /payment/confirm
-X-Member-Id: 2
-Content-Type: application/json
-
-{
-  "enrollmentId": 10,
-  "amount": 50000
-}
-```
 
 ## 데이터 모델 설명
 ![img.png](img.png)
