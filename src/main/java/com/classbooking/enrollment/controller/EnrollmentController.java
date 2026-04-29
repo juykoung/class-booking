@@ -1,13 +1,12 @@
 package com.classbooking.enrollment.controller;
 
+import com.classbooking.enrollment.dto.EnrollmentListResponse;
+import com.classbooking.enrollment.dto.EnrollmentStatus;
 import com.classbooking.enrollment.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/enrollment")
@@ -25,7 +24,7 @@ public class EnrollmentController {
     }
 
     // 수강 취소
-    @PostMapping("/{lectureId}/withdraw")
+    @PostMapping("/{enrollmentId}/withdraw")
     public ResponseEntity<Void> withdraw(
             @RequestHeader("X-Member-Id") Long memberId,
             @PathVariable Long enrollmentId) {
@@ -34,4 +33,13 @@ public class EnrollmentController {
     }
 
     // 내 수강 신청 목록 조회
+    @GetMapping("/list")
+    public ResponseEntity<Page<EnrollmentListResponse>> getMyEnrollments(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @RequestParam(required = false) EnrollmentStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<EnrollmentListResponse> response = enrollmentService.getMyEnrollments(memberId, status, page, size);
+        return ResponseEntity.ok(response);
+    }
 }

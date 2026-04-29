@@ -1,6 +1,7 @@
 package com.classbooking.enrollment.service;
 
 import com.classbooking.enrollment.dto.Enrollment;
+import com.classbooking.enrollment.dto.EnrollmentListResponse;
 import com.classbooking.enrollment.dto.EnrollmentStatus;
 import com.classbooking.enrollment.dto.EnrollmentWithdrawnEvent;
 import com.classbooking.enrollment.repository.EnrollmentRepository;
@@ -9,6 +10,10 @@ import com.classbooking.lecture.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,5 +60,14 @@ public class EnrollmentService {
         eventPublisher.publishEvent(new EnrollmentWithdrawnEvent(enrollmentId));
     }
 
-    // 내 수강 신청 목록 조회
+    @Transactional(readOnly = true)
+    public Page<EnrollmentListResponse> getMyEnrollments(Long memberId, EnrollmentStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Enrollment> enrollments = status == null
+                ? enrollmentRepository.findByMemberId(memberId, pageable)
+                : enrollmentRepository.findByMemberIdAndStatus(memberId, status, pageable);
+
+        return enrollments.map(EnrollmentListResponse::from);
+    }
 }
