@@ -1,4 +1,4 @@
-package com.classbooking.lecture;
+package com.classbooking.lecture.dto;
 
 import com.classbooking.common.BaseEntity;
 import jakarta.persistence.Column;
@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 public class Lecture extends BaseEntity {
     @Column(nullable = false)
     private Long instructorId;
+
+    @Column(nullable = false, length = 10)
+    private String instructorName;
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -43,15 +46,36 @@ public class Lecture extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private LectureStatus status;
 
-    public Lecture(Long instructorId, String title, String description, Integer capacity, BigDecimal price, LocalDateTime startTime, LocalDateTime endTime) {
+    public Lecture(Long instructorId, String instructorName, String title, String description, Integer capacity, BigDecimal price, LocalDateTime startAt, LocalDateTime endAt) {
         this.instructorId = instructorId;
+        this.instructorName = instructorName;
         this.title = title;
         this.description = description;
         this.capacity = capacity;
         this.confirmedCount = 0; // 초기값은 0
         this.price = price;
-        this.startAt = startTime;
-        this.endAt = endTime;
+        this.startAt = startAt;
+        this.endAt = endAt;
         this.status = LectureStatus.DRAFT; // 초기 상태는 DRAFT
+    }
+
+    public void open(Long memberId) {
+        if (!this.instructorId.equals(memberId)) {
+            throw new IllegalStateException("강의 개설 권한이 없습니다.");
+        }
+        if (this.status != LectureStatus.DRAFT) {
+            throw new IllegalStateException("강의는 DRAFT 상태에서만 OPEN으로 변경할 수 있습니다.");
+        }
+        this.status = LectureStatus.OPEN;
+    }
+
+    public void close(Long memberId) {
+        if (!this.instructorId.equals(memberId)) {
+            throw new IllegalStateException("강의 폐쇄 권한이 없습니다.");
+        }
+        if (this.status != LectureStatus.OPEN) {
+            throw new IllegalStateException("강의는 OPEN 상태에서만 CLOSE로 변경할 수 있습니다.");
+        }
+        this.status = LectureStatus.CLOSED;
     }
 }
